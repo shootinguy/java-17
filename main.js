@@ -42,7 +42,7 @@ function start_game() {
         let card_img = document.createElement("img");
         let card = deck.pop();
 
-        card_img.src = "./cards/" + card + ".png";
+        card_img.src = "./cards/" + convert_card_to_filename(card);
         dealer_sum += get_value(card);
         dealer_ace_count += check_ace(card);
         document.querySelector("#dealer_cards").append(card_img);
@@ -52,7 +52,7 @@ function start_game() {
         let card_img = document.createElement("img");
         let card = deck.pop();
 
-        card_img.src = "./cards/" + card + ".png";
+        card_img.src = "./cards/" + convert_card_to_filename(card);
         your_sum += get_value(card);
         your_ace_count += check_ace(card);
         document.querySelector("#your_cards").append(card_img);
@@ -70,7 +70,7 @@ function hit() {
     let card_img = document.createElement("img");
     let card = deck.pop();
 
-    card_img.src = "./cards/" + card + ".png";
+    card_img.src = "./cards/" + convert_card_to_filename(card);
     your_sum += get_value(card);
     your_ace_count += check_ace(card);
     document.querySelector("#your_cards").append(card_img);
@@ -85,7 +85,7 @@ function stay() {
     your_sum = reduce_ace(your_sum, your_ace_count);
 
     can_hit = false;
-    document.querySelector("#hidden").src = "./cards/" + hidden + ".png";
+    document.querySelector("#hidden").src = "./cards/" + convert_card_to_filename(hidden);
 
     let message;
 
@@ -111,7 +111,7 @@ function stay() {
 }
 
 function get_value(card) {
-    let data = card.split("-"); // Fixed split character
+    let data = card.split("-");
     let value = data[0];
 
     if (isNaN(value)) {
@@ -129,7 +129,7 @@ function check_ace(card) {
     if (card[0] === "A") {
         return 1;
     }
-    
+
     return 0;
 }
 
@@ -140,4 +140,33 @@ function reduce_ace(player_sum, player_ace_count) {
     }
 
     return player_sum;
+}
+
+function convert_card_to_filename(card) {
+    const [value, suit] = card.split("-");
+
+    const valueMap = {
+        "A": "ace",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8",
+        "9": "9",
+        "10": "10",
+        "J": "jack",
+        "Q": "queen",
+        "K": "king"
+    };
+
+    const suitMap = {
+        "C": "clubs",
+        "D": "diamonds",
+        "H": "hearts",
+        "S": "spades"
+    };
+
+    return `${valueMap[value]}_of_${suitMap[suit]}.png`;
 }
