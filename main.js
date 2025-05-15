@@ -10,7 +10,7 @@ window.onload = function() {
     build_deck();
     shuffle_deck();
     start_game();
-}
+};
 
 function build_deck() {
     let values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -19,7 +19,7 @@ function build_deck() {
 
     for (let i = 0; i < types.length; i++) {
         for (let j = 0; j < values.length; j++) {
-            deck.push(values[j] + "-" + types[i]);
+            deck.push(values[j] + "-" + types[i]);  // Example: "A-S"
         }
     }
 }
@@ -27,9 +27,7 @@ function build_deck() {
 function shuffle_deck() {
     for (let i = 0; i < deck.length; i++) {
         let j = Math.floor(Math.random() * deck.length);
-        let temp = deck[i];
-        deck[i] = deck[j];
-        deck[j] = temp;
+        [deck[i], deck[j]] = [deck[j], deck[i]];
     }
 }
 
@@ -38,21 +36,29 @@ function start_game() {
     dealer_sum += get_value(hidden);
     dealer_ace_count += check_ace(hidden);
 
+    // Show one card hidden
+    let hidden_img = document.createElement("img");
+    hidden_img.id = "hidden";
+    hidden_img.src = "./cards/BACK.png";
+    document.querySelector("#dealer_cards").append(hidden_img);
+
+    // Dealer draws until 18+
     while (dealer_sum < 18) {
         let card_img = document.createElement("img");
         let card = deck.pop();
 
-        card_img.src = "./cards/" + convert_card_to_filename(card);
+        card_img.src = "./cards/" + card + ".png";
         dealer_sum += get_value(card);
         dealer_ace_count += check_ace(card);
         document.querySelector("#dealer_cards").append(card_img);
     }
 
+    // Player draws 2
     for (let i = 0; i < 2; i++) {
         let card_img = document.createElement("img");
         let card = deck.pop();
 
-        card_img.src = "./cards/" + convert_card_to_filename(card);
+        card_img.src = "./cards/" + card + ".png";
         your_sum += get_value(card);
         your_ace_count += check_ace(card);
         document.querySelector("#your_cards").append(card_img);
@@ -63,14 +69,12 @@ function start_game() {
 }
 
 function hit() {
-    if (!can_hit) {
-        return;
-    }
+    if (!can_hit) return;
 
     let card_img = document.createElement("img");
     let card = deck.pop();
 
-    card_img.src = "./cards/" + convert_card_to_filename(card);
+    card_img.src = "./cards/" + card + ".png";
     your_sum += get_value(card);
     your_ace_count += check_ace(card);
     document.querySelector("#your_cards").append(card_img);
@@ -85,23 +89,19 @@ function stay() {
     your_sum = reduce_ace(your_sum, your_ace_count);
 
     can_hit = false;
-    document.querySelector("#hidden").src = "./cards/" + convert_card_to_filename(hidden);
+    document.querySelector("#hidden").src = "./cards/" + hidden + ".png";
 
     let message;
 
     if (your_sum > 21) {
         message = "You bust!";
-    }
-    else if (dealer_sum > 21) {
+    } else if (dealer_sum > 21) {
         message = "You win!";
-    }
-    else if (your_sum === dealer_sum) {
-        message = "House wins!"; //not a tie
-    }
-    else if (your_sum > dealer_sum) {
+    } else if (your_sum === dealer_sum) {
+        message = "House wins!"; // not a tie
+    } else if (your_sum > dealer_sum) {
         message = "You win!";
-    }
-    else {
+    } else {
         message = "You lose!";
     }
 
@@ -111,14 +111,10 @@ function stay() {
 }
 
 function get_value(card) {
-    let data = card.split("-");
-    let value = data[0];
+    let value = card.split("-")[0];
 
     if (isNaN(value)) {
-        if (value === "A") {
-            return 11;
-        }
-
+        if (value === "A") return 11;
         return 10;
     }
 
@@ -126,47 +122,13 @@ function get_value(card) {
 }
 
 function check_ace(card) {
-    if (card[0] === "A") {
-        return 1;
-    }
-
-    return 0;
+    return card.startsWith("A") ? 1 : 0;
 }
 
-function reduce_ace(player_sum, player_ace_count) {
-    while (player_sum > 21 && player_ace_count > 0) {
-        player_sum -= 10;
-        player_ace_count -= 1;
+function reduce_ace(sum, ace_count) {
+    while (sum > 21 && ace_count > 0) {
+        sum -= 10;
+        ace_count--;
     }
-
-    return player_sum;
-}
-
-function convert_card_to_filename(card) {
-    const [value, suit] = card.split("-");
-
-    const valueMap = {
-        "A": "ace",
-        "2": "2",
-        "3": "3",
-        "4": "4",
-        "5": "5",
-        "6": "6",
-        "7": "7",
-        "8": "8",
-        "9": "9",
-        "10": "10",
-        "J": "jack",
-        "Q": "queen",
-        "K": "king"
-    };
-
-    const suitMap = {
-        "C": "clubs",
-        "D": "diamonds",
-        "H": "hearts",
-        "S": "spades"
-    };
-
-    return `${valueMap[value]}_of_${suitMap[suit]}.png`;
+    return sum;
 }
